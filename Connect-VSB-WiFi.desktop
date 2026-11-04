@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Connect to VSB WiFi
+Exec=/usr/local/bin/vsb-wifi-prompt
+Icon=network-wireless
+Terminal=false
