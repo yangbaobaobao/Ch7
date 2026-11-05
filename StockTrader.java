@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class StockTrader {
 
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner in = new Scanner(new File("tiny.txt"));
+        Scanner in = new Scanner(new File("rising.txt"));
         String symbol = in.next();
         int n = in.nextInt();
 
@@ -73,11 +73,56 @@ public class StockTrader {
     
     public static String monthName(int month) {
 		String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-		return months[month];
+		return months[month-1];
     }
     
     public static String decide(double[] history, boolean holding, double boughtAt) {
-		return buyAndHold(history, holding, boughtAt);   // change this line to switch strategies
+		//return buyAndHold(history, holding, boughtAt);   // change this line to switch strategies
+		return dipBuyer(history, holding, boughtAt);
+	}
+	
+	public static String dipBuyer(double[] history, boolean holding, double boughtAt) {
+		int dipRow = 0;
+		boolean bought = false;
+		double priceBought = 0;
+		for (int i = 1; i < history.length; i++) {
+			if (history[i-1] > history[i]) {
+				dipRow++;
+				if (dipRow > 1) {
+					if (i == history.length-1)
+						return "BUY";
+					else {
+						bought = true;
+						priceBought = history[i];
+					}
+				}
+			}
+			else {
+				dipRow = 0;
+				if (bought && (history[i] / priceBought > 1.1)) {
+					bought = false;
+					return "SELL";
+				}
+			}
+		}
+		return "HOLD";
+	}
+	
+	public static String movingAverage(double[] history, boolean holding, double boughtAt) {
+		boolean bought = false;
+		if (history.length < 12) return "HOLD";
+		else {
+			int avg = 0;
+			for (int i = 0; i < 12; i++) {
+				avg += history[i];
+			}
+			avg /= 12;
+		}
+		
+	}
+	
+	public static String buyAndHold(double[] history, boolean holding, double boughtAt) {
+		return "BUY";
 	}
 	
 	public static final double FEE = 10.0;
