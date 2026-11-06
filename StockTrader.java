@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class StockTrader {
 
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner in = new Scanner(new File("rising.txt"));
+        Scanner in = new Scanner(new File("sp500_1990_2025.txt"));
         String symbol = in.next();
         int n = in.nextInt();
 
@@ -77,8 +77,10 @@ public class StockTrader {
     }
     
     public static String decide(double[] history, boolean holding, double boughtAt) {
-		//return buyAndHold(history, holding, boughtAt);   // change this line to switch strategies
-		return dipBuyer(history, holding, boughtAt);
+		return buyAndHold(history, holding, boughtAt);   // change this line to switch strategies
+		//return dipBuyer(history, holding, boughtAt);
+		//return movingAverage(history, holding, boughtAt);
+		//return myStrategy(history, holding, boughtAt);
 	}
 	
 	public static String dipBuyer(double[] history, boolean holding, double boughtAt) {
@@ -108,6 +110,25 @@ public class StockTrader {
 		return "HOLD";
 	}
 	
+	public static String myStrategy(double[] history, boolean holding, double boughtAt) {
+		double prime = 0;
+		double prime2 = 0;
+		for (int i = 2; i < history.length; i++) {
+			prime = history[i] - history[i-1];
+			prime2 = prime - (history[i-1] - history[i-2]);
+			//System.out.println(prime + " : " + prime2);
+			if (!holding && -prime > history[i] * 0) {
+				if (prime2 > 0) {
+					return "BUY";
+				}
+			}
+			if (holding && prime2 < prime * -0 && boughtAt*1.2 < history[i]) {
+				return "SELL";
+			}
+		}
+		return "HOLD";
+	}
+	
 	public static String movingAverage(double[] history, boolean holding, double boughtAt) {
 		boolean bought = false;
 		if (history.length < 12) return "HOLD";
@@ -117,8 +138,20 @@ public class StockTrader {
 				avg += history[i];
 			}
 			avg /= 12;
+			for (int i = 11; i < history.length; i++) {
+				if (!bought && history[i] > avg) {
+					bought = true;
+					if (i == history.length - 1)
+						return "BUY";
+				}
+				if (bought && history[i] < avg) {
+					bought = false;
+					if (i == history.length - 1)
+						return "SELL";
+				}
+			}
 		}
-		
+		return "HOLD";
 	}
 	
 	public static String buyAndHold(double[] history, boolean holding, double boughtAt) {
